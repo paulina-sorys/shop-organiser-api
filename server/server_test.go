@@ -10,7 +10,7 @@ func TestGETProductsAll(t *testing.T) {
 	request, _ := http.NewRequest(http.MethodGet, "api/v1/products/all", nil)
 	response := httptest.NewRecorder()
 
-	Server(response, request)
+	New(response, request)
 
 	got := response.Body.String()
 	want := "20"
