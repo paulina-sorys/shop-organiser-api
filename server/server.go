@@ -1,10 +1,15 @@
 package server
 
 import (
-	"fmt"
+	"encoding/json"
 	"net/http"
 )
 
+type Product struct {
+	Name string
+}
+
 func New(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "20")
+	allProducts := []Product{{"juice"}, {"cheese"}}
+	json.NewEncoder(w).Encode(allProducts)
 }
