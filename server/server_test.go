@@ -16,39 +16,44 @@ func checkStatus(t *testing.T, expected, got int) {
 }
 
 // Calls server endpoint and return its response
-func callApi(method, path string) *httptest.ResponseRecorder {
+func (s Server) callApi(method, path string) *httptest.ResponseRecorder {
 	request, _ := http.NewRequest(method, path, nil)
 	response := httptest.NewRecorder()
 
-	New().ServeHTTP(response, request)
+	s.ServeHTTP(response, request)
 	return response
 }
 
-func TestGETProductsAll(t *testing.T) {
-	response := callApi(http.MethodGet, "/api/v1/products/all")
+func TestServer(t *testing.T) {
+	server := New()
 
-	checkStatus(t, http.StatusOK, response.Code)
+	t.Run("GET all products", func(t *testing.T) {
+		response := server.callApi(http.MethodGet, "/api/v1/products/all")
 
-	var got []Product
+		checkStatus(t, http.StatusOK, response.Code)
 
-	err := json.NewDecoder(response.Body).Decode(&got)
+		var got []Product
 
-	if err != nil {
-		t.Fatalf("Unable to parse response from server %q into slice of products, '%v'", response.Body, err)
-	}
+		err := json.NewDecoder(response.Body).Decode(&got)
 
-	want := []Product{
-		{"juice"},
-		{"cheese"},
-	}
+		if err != nil {
+			t.Fatalf("Unable to parse response from server %q into slice of products, '%v'", response.Body, err)
+		}
 
-	if !reflect.DeepEqual(want, got) {
-		t.Errorf("got %q, want %q", got, want)
-	}
-}
+		want := []Product{
+			{"juice"},
+			{"cheese"},
+		}
 
-func TestPOSTNewProduct(t *testing.T) {
-	response := callApi(http.MethodPost, "/api/v1/product/new")
+		if !reflect.DeepEqual(want, got) {
+			t.Errorf("got %q, want %q", got, want)
+		}
+	})
 
-	checkStatus(t, http.StatusAccepted, response.Code)
+	t.Run("POST new product", func(t *testing.T) {
+		response := server.callApi(http.MethodPost, "/api/v1/product/new")
+
+		checkStatus(t, http.StatusAccepted, response.Code)
+	})
+
 }
