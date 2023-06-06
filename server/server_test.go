@@ -10,13 +10,24 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGETProductsAll(t *testing.T) {
-	request, _ := http.NewRequest(http.MethodGet, "/api/v1/products/all", nil)
+// Test fails if received request response status is not expected
+func checkStatus(t *testing.T, expected, got int) {
+	assert.Equal(t, expected, got, "Wrong status. Expected %d, got %d", expected, got)
+}
+
+// Calls server endpoint and return its response
+func callApi(method, path string) *httptest.ResponseRecorder {
+	request, _ := http.NewRequest(method, path, nil)
 	response := httptest.NewRecorder()
 
 	New().ServeHTTP(response, request)
+	return response
+}
 
-	assert.Equal(t, http.StatusOK, response.Code, "Wrong status. Expected %d, got %d", http.StatusOK, response.Code)
+func TestGETProductsAll(t *testing.T) {
+	response := callApi(http.MethodGet, "/api/v1/products/all")
+
+	checkStatus(t, http.StatusOK, response.Code)
 
 	var got []Product
 
@@ -37,10 +48,7 @@ func TestGETProductsAll(t *testing.T) {
 }
 
 func TestPOSTNewProduct(t *testing.T) {
-	request, _ := http.NewRequest(http.MethodPost, "/api/v1/product/new", nil)
-	response := httptest.NewRecorder()
+	response := callApi(http.MethodPost, "/api/v1/product/new")
 
-	New().ServeHTTP(response, request)
-
-	assert.Equal(t, http.StatusAccepted, response.Code)
+	checkStatus(t, http.StatusAccepted, response.Code)
 }
