@@ -26,8 +26,15 @@ func (db *StubInMemeoryDB) AddProduct(p model.Product) {
 }
 
 // Test fails if received request response status is not expected
-func checkStatus(t *testing.T, expected, got int) {
-	assert.Equal(t, expected, got, "Wrong status. Expected %d, got %d", expected, got)
+func checkStatus(t *testing.T, want, got int) {
+	assert.Equal(t, want, got, "Wrong status. Expected %d, got %d", want, got)
+}
+
+// Test fails if received slice of products is not expected
+func checkProducts(t *testing.T, want, got []model.Product) {
+	if !reflect.DeepEqual(want, got) {
+		t.Errorf("Received incorrect slice of products. Expected %q, got %q", want, got)
+	}
 }
 
 // Calls server endpoint and returns its response
@@ -45,8 +52,8 @@ func (s *Server) callApi(method, path string, body []byte) *httptest.ResponseRec
 func TestServer(t *testing.T) {
 	db := &StubInMemeoryDB{
 		[]model.Product{
-			{"juice"},
-			{"cheese"},
+			{Name: "juice"},
+			{Name: "cheese"},
 		},
 	}
 	server := New(db)
@@ -64,27 +71,18 @@ func TestServer(t *testing.T) {
 			t.Fatalf("Unable to parse response from server %q into slice of products, '%v'", response.Body, err)
 		}
 
-		want := server.store.GetAllProducts()
-
-		if !reflect.DeepEqual(want, got) {
-			t.Errorf("got %q, want %q", got, want)
-		}
+		checkProducts(t, server.store.GetAllProducts(), got)
 	})
 
 	t.Run("POST new product", func(t *testing.T) {
-		productsBeforePOST := server.store.GetAllProducts()
+		productsBeforePOST := db.products
 
 		productJSON, _ := json.Marshal(model.Product{Name: "chocolate"})
-
 		response := server.callApi(http.MethodPost, "/api/v1/product/new", productJSON)
 
-		want := append(productsBeforePOST, model.Product{Name: "chocolate"})
-
-		if !reflect.DeepEqual(want, server.store.GetAllProducts()) {
-			t.Errorf("got %q, want %q", server.store.GetAllProducts(), want)
-		}
-
 		checkStatus(t, http.StatusAccepted, response.Code)
-	})
 
+		want := append(productsBeforePOST, model.Product{Name: "chocolate"})
+		checkProducts(t, want, server.store.GetAllProducts())
+	})
 }
