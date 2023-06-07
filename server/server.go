@@ -4,15 +4,13 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+
+	"github.com/paulina-sorys/shop-organiser/model"
 )
 
-type Product struct {
-	Name string
-}
-
 type InMemoryDB interface {
-	GetAllProducts() []Product
-	AddProduct(Product)
+	GetAllProducts() []model.Product
+	AddProduct(model.Product)
 }
 
 type Server struct {
@@ -26,7 +24,7 @@ func (s *Server) allProductsHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func (s *Server) newProductHandler(w http.ResponseWriter, req *http.Request) {
-	var product Product
+	var product model.Product
 	err := json.NewDecoder(req.Body).Decode(&product)
 	if err != nil {
 		log.Fatalf("Unable to parse request body %q into Product object, '%v'", req.Body, err)

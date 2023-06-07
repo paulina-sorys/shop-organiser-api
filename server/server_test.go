@@ -9,15 +9,28 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/paulina-sorys/shop-organiser/model"
 	"github.com/stretchr/testify/assert"
 )
+
+type StubInMemeoryDB struct {
+	products []model.Product
+}
+
+func (db *StubInMemeoryDB) GetAllProducts() []model.Product {
+	return db.products
+}
+
+func (db *StubInMemeoryDB) AddProduct(p model.Product) {
+	db.products = append(db.products, p)
+}
 
 // Test fails if received request response status is not expected
 func checkStatus(t *testing.T, expected, got int) {
 	assert.Equal(t, expected, got, "Wrong status. Expected %d, got %d", expected, got)
 }
 
-// Calls server endpoint and return its response
+// Calls server endpoint and returns its response
 func (s *Server) callApi(method, path string, body []byte) *httptest.ResponseRecorder {
 	request, err := http.NewRequest(method, path, bytes.NewReader(body))
 	if err != nil {
@@ -29,21 +42,9 @@ func (s *Server) callApi(method, path string, body []byte) *httptest.ResponseRec
 	return response
 }
 
-type StubInMemeoryDB struct {
-	products []Product
-}
-
-func (db *StubInMemeoryDB) GetAllProducts() []Product {
-	return db.products
-}
-
-func (db *StubInMemeoryDB) AddProduct(p Product) {
-	db.products = append(db.products, p)
-}
-
 func TestServer(t *testing.T) {
 	db := &StubInMemeoryDB{
-		[]Product{
+		[]model.Product{
 			{"juice"},
 			{"cheese"},
 		},
@@ -55,7 +56,7 @@ func TestServer(t *testing.T) {
 
 		checkStatus(t, http.StatusOK, response.Code)
 
-		var got []Product
+		var got []model.Product
 
 		err := json.NewDecoder(response.Body).Decode(&got)
 
@@ -73,11 +74,11 @@ func TestServer(t *testing.T) {
 	t.Run("POST new product", func(t *testing.T) {
 		productsBeforePOST := server.store.GetAllProducts()
 
-		productJSON, _ := json.Marshal(Product{"chocolate"})
+		productJSON, _ := json.Marshal(model.Product{Name: "chocolate"})
 
 		response := server.callApi(http.MethodPost, "/api/v1/product/new", productJSON)
 
-		want := append(productsBeforePOST, Product{"chocolate"})
+		want := append(productsBeforePOST, model.Product{Name: "chocolate"})
 
 		if !reflect.DeepEqual(want, server.store.GetAllProducts()) {
 			t.Errorf("got %q, want %q", server.store.GetAllProducts(), want)
