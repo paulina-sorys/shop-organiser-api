@@ -1,5 +1,7 @@
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
+github.com/paulina-sorys/shop-organiser-api/model v0.0.0-20231003182209-97e9d696c8f5 h1:8tUwA1Uy7Mt5F/2dIotsvJ/0pnBAQfGUTOXgpelI2zk=
+github.com/paulina-sorys/shop-organiser-api/model v0.0.0-20231003182209-97e9d696c8f5/go.mod h1:J/4riU6g8n1dQ85LeNVPlg46IfDj59gap1wBaG+69bQ=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/stretchr/testify v1.8.4 h1:CcVxjf3Q8PM0mHUKJCdn+eZZtm5yQwehR5yeSVQQcUk=

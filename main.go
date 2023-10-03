@@ -4,9 +4,9 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/paulina-sorys/shop-organiser/db"
-	"github.com/paulina-sorys/shop-organiser/model"
-	"github.com/paulina-sorys/shop-organiser/server"
+	"github.com/paulina-sorys/shop-organiser-api/db"
+	"github.com/paulina-sorys/shop-organiser-api/model"
+	"github.com/paulina-sorys/shop-organiser-api/server"
 )
 
 func main() {

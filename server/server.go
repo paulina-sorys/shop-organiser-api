@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/paulina-sorys/shop-organiser/model"
+	"github.com/paulina-sorys/shop-organiser-api/model"
 )
 
 type InMemoryDB interface {
