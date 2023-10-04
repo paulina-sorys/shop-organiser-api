@@ -11,15 +11,15 @@ import (
 	"github.com/paulina-sorys/shop-organiser-api/model"
 )
 
-// InMemoryDB interface holds all operations you can impose on database
-type InMemoryDB interface {
+// Store interface holds all operations you can impose on database
+type Store interface {
 	GetAllProducts() []model.Product
 	AddProduct(model.Product)
 }
 
 type Server struct {
 	http.Handler // handler for all api endpoints
-	store        InMemoryDB
+	store        Store
 }
 
 func (s *Server) allProductsHandler(w http.ResponseWriter, req *http.Request) {
@@ -38,7 +38,7 @@ func (s *Server) newProductHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 // New creates all api endpoints handlers. It requires an instance of database.
-func New(db InMemoryDB) *Server {
+func New(db Store) *Server {
 	s := Server{}
 	s.store = db
 
