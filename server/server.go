@@ -5,10 +5,9 @@ package server
 
 import (
 	"encoding/json"
-	"log"
-	"net/http"
-
+	"fmt"
 	"github.com/paulina-sorys/shop-organiser-api/model"
+	"net/http"
 )
 
 // Store interface holds all operations you can impose on database
@@ -31,7 +30,9 @@ func (s *Server) newProductHandler(w http.ResponseWriter, req *http.Request) {
 	var product model.Product
 	err := json.NewDecoder(req.Body).Decode(&product)
 	if err != nil {
-		log.Fatalf("Unable to parse request body %q into Product object, '%v'", req.Body, err)
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "Unable to parse request body into Product object, err: '%v'", err)
+		return
 	}
 	s.store.AddProduct(product)
 	w.WriteHeader(http.StatusAccepted)

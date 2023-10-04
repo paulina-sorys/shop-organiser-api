@@ -86,4 +86,9 @@ func TestServer(t *testing.T) {
 		want := append(productsBeforePOST, productToAdd)
 		checkProducts(t, want, server.store.GetAllProducts())
 	})
+
+	t.Run("try POST new product with unrecognised json representation of product", func(t *testing.T) {
+		response := server.callApi(http.MethodPost, "/api/v1/product/new", []byte("Wrong product JSON representation"))
+		checkStatus(t, http.StatusBadRequest, response.Code)
+	})
 }
