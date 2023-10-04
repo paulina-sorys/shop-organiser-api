@@ -1,3 +1,6 @@
+// Package server handles all api endpoints for managing grocery and chemical products in the application.
+// It follows CRUD notion. As it's a work-in-progress package it uses in-memory database for simplicity.
+// It's intended to switch into database such as Postgress/MongoDB or other later on.
 package server
 
 import (
@@ -8,14 +11,15 @@ import (
 	"github.com/paulina-sorys/shop-organiser-api/model"
 )
 
+// InMemoryDB interface holds all operations you can impose on database
 type InMemoryDB interface {
 	GetAllProducts() []model.Product
 	AddProduct(model.Product)
 }
 
 type Server struct {
-	http.Handler
-	store InMemoryDB
+	http.Handler // handler for all api endpoints
+	store        InMemoryDB
 }
 
 func (s *Server) allProductsHandler(w http.ResponseWriter, req *http.Request) {
@@ -33,6 +37,7 @@ func (s *Server) newProductHandler(w http.ResponseWriter, req *http.Request) {
 	w.WriteHeader(http.StatusAccepted)
 }
 
+// New creates all api endpoints handlers. It requires an instance of database.
 func New(db InMemoryDB) *Server {
 	s := Server{}
 	s.store = db
