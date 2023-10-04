@@ -13,15 +13,15 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type StubInMemeoryDB struct {
+type StubInMemoryDB struct {
 	products []model.Product
 }
 
-func (db *StubInMemeoryDB) GetAllProducts() []model.Product {
+func (db *StubInMemoryDB) GetAllProducts() []model.Product {
 	return db.products
 }
 
-func (db *StubInMemeoryDB) AddProduct(p model.Product) {
+func (db *StubInMemoryDB) AddProduct(p model.Product) {
 	db.products = append(db.products, p)
 }
 
@@ -50,7 +50,7 @@ func (s *Server) callApi(method, path string, body []byte) *httptest.ResponseRec
 }
 
 func TestServer(t *testing.T) {
-	db := &StubInMemeoryDB{
+	db := &StubInMemoryDB{
 		[]model.Product{
 			{Name: "juice"},
 			{Name: "cheese"},
