@@ -10,6 +10,6 @@ import (
 )
 
 func main() {
-	db := &db.InMemeoryDB{Products: []model.Product{{Name: "test"}}}
+	db := &db.InMemoryDB{Products: []model.Product{{Name: "test"}}}
 	log.Fatal(http.ListenAndServe(":5000", server.New(db).Handler))
 }
