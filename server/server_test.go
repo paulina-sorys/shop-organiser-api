@@ -76,13 +76,14 @@ func TestServer(t *testing.T) {
 
 	t.Run("POST new product", func(t *testing.T) {
 		productsBeforePOST := db.products
+		productToAdd := model.Product{Name: "chocolate"}
 
-		productJSON, _ := json.Marshal(model.Product{Name: "chocolate"})
+		productJSON, _ := json.Marshal(productToAdd)
 		response := server.callApi(http.MethodPost, "/api/v1/product/new", productJSON)
 
 		checkStatus(t, http.StatusAccepted, response.Code)
 
-		want := append(productsBeforePOST, model.Product{Name: "chocolate"})
+		want := append(productsBeforePOST, productToAdd)
 		checkProducts(t, want, server.store.GetAllProducts())
 	})
 }
