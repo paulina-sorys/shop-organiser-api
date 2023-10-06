@@ -52,8 +52,8 @@ func (s *Server) callApi(method, path string, body []byte) *httptest.ResponseRec
 func TestServer(t *testing.T) {
 	db := &StubInMemoryDB{
 		[]model.Product{
-			{Name: "juice"},
-			{Name: "cheese"},
+			{Name: "juice", ID: "123"},
+			{Name: "cheese", ID: "342"},
 		},
 	}
 	server := New(db)
@@ -90,5 +90,21 @@ func TestServer(t *testing.T) {
 	t.Run("try POST new product with unrecognised json representation of product", func(t *testing.T) {
 		response := server.callApi(http.MethodPost, "/api/v1/product/new", []byte("Wrong product JSON representation"))
 		checkStatus(t, http.StatusBadRequest, response.Code)
+	})
+
+	t.Run("PUT product (edit existing product)", func(t *testing.T) {
+		productEditOutcome := model.Product{Name: "orange juice", ID: "123"}
+		productsAfterPUT := func() []model.Product {
+			products := make([]model.Product, len(db.products))
+			copy(products, db.products)
+			products[0] = productEditOutcome
+			return products
+		}()
+		productJSON, _ := json.Marshal(productEditOutcome)
+
+		response := server.callApi(http.MethodPut, "/api/v1/product/edit", productJSON)
+
+		checkStatus(t, http.StatusOK, response.Code)
+		checkProducts(t, productsAfterPUT, server.store.GetAllProducts())
 	})
 }
