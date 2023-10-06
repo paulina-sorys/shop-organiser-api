@@ -1,3 +1,3 @@
 module github.com/paulina-sorys/shop-organiser-api/model
 
-go 1.20
+go 1.19
