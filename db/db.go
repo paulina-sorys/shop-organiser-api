@@ -1,6 +1,6 @@
 package db
 
-import "github.com/paulina-sorys/shop-organiser-api/model"
+import "model"
 
 type InMemoryDB struct {
 	Products []model.Product

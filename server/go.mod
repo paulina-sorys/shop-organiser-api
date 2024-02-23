@@ -1,10 +1,8 @@
-module github.com/paulina-sorys/shop-organiser-api/server
+module server
 
 go 1.19
 
-require (
-	github.com/stretchr/testify v1.8.4
-)
+require github.com/stretchr/testify v1.8.4
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect

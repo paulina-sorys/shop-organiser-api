@@ -1,8 +1,8 @@
 go 1.20
 
 use (
-	.
-	./server
-	./model
+	./app
 	./db
+	./model
+	./server
 )

@@ -6,19 +6,13 @@ package server
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/paulina-sorys/shop-organiser-api/model"
+	"model"
 	"net/http"
 )
 
-// Store interface holds all operations you can impose on database
-type Store interface {
-	GetAllProducts() []model.Product
-	AddProduct(model.Product)
-}
-
 type Server struct {
 	http.Handler // handler for all api endpoints
-	store        Store
+	store        model.Store
 }
 
 func (s *Server) allProductsHandler(w http.ResponseWriter, req *http.Request) {
@@ -39,7 +33,7 @@ func (s *Server) newProductHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 // New creates all api endpoints handlers. It requires an instance of database.
-func New(db Store) *Server {
+func New(db model.Store) *Server {
 	s := Server{}
 	s.store = db
 

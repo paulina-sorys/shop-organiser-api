@@ -9,8 +9,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/paulina-sorys/shop-organiser-api/model"
 	"github.com/stretchr/testify/assert"
+	"model"
 )
 
 type StubInMemoryDB struct {
