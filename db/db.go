@@ -15,5 +15,10 @@ func (db *InMemoryDB) AddProduct(p model.Product) {
 }
 
 func (db *InMemoryDB) EditProduct(p model.Product) {
-
+	for i, product := range db.Products {
+		if product.ID == p.ID {
+			db.Products[i] = p
+			break
+		}
+	}
 }

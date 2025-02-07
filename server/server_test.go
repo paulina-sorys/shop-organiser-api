@@ -2,6 +2,7 @@ package server
 
 import (
 	"bytes"
+	"db"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -12,27 +13,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"model"
 )
-
-type StubInMemoryDB struct {
-	products []model.Product
-}
-
-func (db *StubInMemoryDB) GetAllProducts() []model.Product {
-	return db.products
-}
-
-func (db *StubInMemoryDB) AddProduct(p model.Product) {
-	db.products = append(db.products, p)
-}
-
-func (db *StubInMemoryDB) EditProduct(p model.Product) {
-	for i, product := range db.products {
-		if product.ID == p.ID {
-			db.products[i] = p
-			break
-		}
-	}
-}
 
 // Test fails if received request response status is not expected
 func checkStatus(t *testing.T, want, got int) {
@@ -59,8 +39,8 @@ func (s *Server) callApi(method, path string, body []byte) *httptest.ResponseRec
 }
 
 func TestServer(t *testing.T) {
-	db := &StubInMemoryDB{
-		[]model.Product{
+	db := &db.InMemoryDB{
+		Products: []model.Product{
 			{Name: "juice", ID: "123"},
 			{Name: "cheese", ID: "342"},
 		},
@@ -84,7 +64,7 @@ func TestServer(t *testing.T) {
 	})
 
 	t.Run("POST new product", func(t *testing.T) {
-		productsBeforePOST := db.products
+		productsBeforePOST := db.Products
 		productToAdd := model.Product{Name: "chocolate"}
 
 		productJSON, _ := json.Marshal(productToAdd)
@@ -104,8 +84,8 @@ func TestServer(t *testing.T) {
 	t.Run("PUT product (edit existing product)", func(t *testing.T) {
 		productEditOutcome := model.Product{Name: "orange juice", ID: "123"}
 		productsAfterPUT := func() []model.Product {
-			products := make([]model.Product, len(db.products))
-			copy(products, db.products)
+			products := make([]model.Product, len(db.Products))
+			copy(products, db.Products)
 			products[0] = productEditOutcome
 			return products
 		}()
