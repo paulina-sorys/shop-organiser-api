@@ -13,3 +13,7 @@ func (db *InMemoryDB) GetAllProducts() []model.Product {
 func (db *InMemoryDB) AddProduct(p model.Product) {
 	db.Products = append(db.Products, p)
 }
+
+func (db *InMemoryDB) EditProduct(p model.Product) {
+
+}

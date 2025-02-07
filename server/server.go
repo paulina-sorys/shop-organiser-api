@@ -15,6 +15,20 @@ type Server struct {
 	store        model.Store
 }
 
+// New creates all api endpoints handlers.
+func New(db model.Store) *Server {
+	s := Server{}
+	s.store = db
+
+	mux := http.NewServeMux()
+	mux.Handle("/api/v1/products/all", http.HandlerFunc(s.allProductsHandler))
+	mux.Handle("/api/v1/product/new", http.HandlerFunc(s.newProductHandler))
+	mux.Handle("/api/v1/product/edit", http.HandlerFunc(s.editProductHandler))
+
+	s.Handler = mux
+	return &s
+}
+
 func (s *Server) allProductsHandler(w http.ResponseWriter, req *http.Request) {
 	json.NewEncoder(w).Encode(s.store.GetAllProducts())
 	w.WriteHeader(http.StatusOK)
@@ -23,24 +37,23 @@ func (s *Server) allProductsHandler(w http.ResponseWriter, req *http.Request) {
 func (s *Server) newProductHandler(w http.ResponseWriter, req *http.Request) {
 	var product model.Product
 	err := json.NewDecoder(req.Body).Decode(&product)
+	handleDecodingProductError(err, w)
+	s.store.AddProduct(product)
+	w.WriteHeader(http.StatusAccepted)
+}
+
+func (s *Server) editProductHandler(w http.ResponseWriter, req *http.Request) {
+	var product model.Product
+	err := json.NewDecoder(req.Body).Decode(&product)
+	handleDecodingProductError(err, w)
+	s.store.EditProduct(product)
+	w.WriteHeader(http.StatusOK)
+}
+
+func handleDecodingProductError(err error, w http.ResponseWriter) {
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "Unable to parse request body into Product object, err: '%v'", err)
 		return
 	}
-	s.store.AddProduct(product)
-	w.WriteHeader(http.StatusAccepted)
-}
-
-// New creates all api endpoints handlers. It requires an instance of database.
-func New(db model.Store) *Server {
-	s := Server{}
-	s.store = db
-
-	mux := http.NewServeMux()
-	mux.Handle("/api/v1/products/all", http.HandlerFunc(s.allProductsHandler))
-	mux.Handle("/api/v1/product/new", http.HandlerFunc(s.newProductHandler))
-
-	s.Handler = mux
-	return &s
 }

@@ -25,15 +25,24 @@ func (db *StubInMemoryDB) AddProduct(p model.Product) {
 	db.products = append(db.products, p)
 }
 
+func (db *StubInMemoryDB) EditProduct(p model.Product) {
+	for i, product := range db.products {
+		if product.ID == p.ID {
+			db.products[i] = p
+			break
+		}
+	}
+}
+
 // Test fails if received request response status is not expected
 func checkStatus(t *testing.T, want, got int) {
-	assert.Equal(t, want, got, "Wrong status. Expected %d, got %d", want, got)
+	assert.Equal(t, want, got, "Wrong http status code.\nExpected: %d\n\t Got: %d", want, got)
 }
 
 // Test fails if received slice of products is not expected
 func checkProducts(t *testing.T, want, got []model.Product) {
 	if !reflect.DeepEqual(want, got) {
-		t.Errorf("Received incorrect slice of products. Expected %q, got %q", want, got)
+		t.Errorf("Received incorrect slice of products.\nExpected: %q\n\t Got: %q", want, got)
 	}
 }
 
