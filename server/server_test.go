@@ -42,8 +42,8 @@ func (s *Server) callApi(method, path string, body []byte) *httptest.ResponseRec
 func TestServer(t *testing.T) {
 	dbStub := &db.InMemoryDB{
 		Products: []model.Product{
-			{Name: "juice", ID: "123"},
-			{Name: "cheese", ID: "342"},
+			{Name: "juice", ID: 1},
+			{Name: "cheese", ID: 2},
 		},
 	}
 	server := New(dbStub)
@@ -73,6 +73,7 @@ func TestServer(t *testing.T) {
 
 		checkStatus(t, http.StatusOK, response.Code)
 
+		productToAdd.ID = 3
 		want := append(productsBeforePOST, productToAdd)
 		checkProducts(t, want, server.store.GetAllProducts())
 	})
@@ -83,7 +84,7 @@ func TestServer(t *testing.T) {
 	})
 
 	t.Run("PUT product (edit existing product)", func(t *testing.T) {
-		productEditOutcome := model.Product{Name: "orange juice", ID: "123"}
+		productEditOutcome := model.Product{Name: "orange juice", ID: 1}
 		productsAfterPUT := func() []model.Product {
 			products := make([]model.Product, len(dbStub.Products))
 			copy(products, dbStub.Products)
@@ -99,14 +100,14 @@ func TestServer(t *testing.T) {
 	})
 
 	t.Run("try PUT product but product is not found in database", func(t *testing.T) {
-		productNotInDatabase := model.Product{Name: "milk", ID: "456"}
+		productNotInDatabase := model.Product{Name: "milk", ID: 456} // TODO: should validate for existence of ID before calling db
 		productJSON, _ := json.Marshal(productNotInDatabase)
 		response := server.callApi(http.MethodPut, "/api/v1/product/edit", productJSON)
 		checkStatus(t, http.StatusUnprocessableEntity, response.Code)
 	})
 
 	t.Run("DELETE product", func(t *testing.T) {
-		productToDelete := model.Product{Name: "orange juice", ID: "123"}
+		productToDelete := model.Product{Name: "orange juice", ID: 1} // TODO: should validate for existence of ID before calling db
 		productsAfterDelete := func() []model.Product {
 			products := make([]model.Product, len(dbStub.Products)-1)
 			copy(products, dbStub.Products[1:])
@@ -119,7 +120,7 @@ func TestServer(t *testing.T) {
 	})
 
 	t.Run("DELETE not existing product", func(t *testing.T) {
-		productNotInDatabase := model.Product{Name: "pencils", ID: "789"}
+		productNotInDatabase := model.Product{Name: "pencils", ID: 789}
 		productJSON, _ := json.Marshal(productNotInDatabase)
 		response := server.callApi(http.MethodDelete, "/api/v1/product/delete", productJSON)
 		checkStatus(t, http.StatusUnprocessableEntity, response.Code)
@@ -128,13 +129,13 @@ func TestServer(t *testing.T) {
 
 func TestCallingServerEndpointsWithIncorrectHttpMethods(t *testing.T) {
 	productToAddJSON, _ := json.Marshal(model.Product{Name: "plant"})
-	productEditOutcomeJSON, _ := json.Marshal(model.Product{Name: "juice", ID: "123"})
-	productToDeleteJSON, _ := json.Marshal(model.Product{Name: "cheese", ID: "342"})
+	productEditOutcomeJSON, _ := json.Marshal(model.Product{Name: "juice", ID: 1})
+	productToDeleteJSON, _ := json.Marshal(model.Product{Name: "cheese", ID: 2})
 
 	dbStub := &db.InMemoryDB{
 		Products: []model.Product{
-			{Name: "juice", ID: "123"},
-			{Name: "cheese", ID: "342"},
+			{Name: "juice", ID: 1},
+			{Name: "cheese", ID: 2},
 		},
 	}
 	server := New(dbStub)

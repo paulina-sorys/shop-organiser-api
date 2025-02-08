@@ -15,7 +15,8 @@ func (db *InMemoryDB) GetAllProducts() []model.Product {
 }
 
 func (db *InMemoryDB) AddProduct(p model.Product) {
-	// it doesn't create product ID but in-memory db doesn't need to
+	lastProductID := db.Products[len(db.Products)-1].ID
+	p.ID = lastProductID + 1
 	db.Products = append(db.Products, p)
 }
 
@@ -39,6 +40,6 @@ func (db *InMemoryDB) DeleteProduct(p model.Product) error {
 	return cannotFindProductError(p.ID)
 }
 
-func cannotFindProductError(id string) error {
-	return errors.New(fmt.Sprintf("Cannot find product with ID %s in database.", id))
+func cannotFindProductError(id int) error {
+	return errors.New(fmt.Sprintf("Cannot find product with ID %d in database.", id))
 }

@@ -2,7 +2,7 @@ package model
 
 type Product struct {
 	Name string
-	ID   string
+	ID   int
 }
 
 // Store interface holds all operations you can impose on database
