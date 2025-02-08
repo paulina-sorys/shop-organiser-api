@@ -20,4 +20,16 @@ Planned functionalities:
    - go to *Settings/Languages & Frameworks/Go/Go modules*
    - select *Enable Go modules integration*
 3. Download all dependencies
-   - run *go mod tidy*
+   - run *go mod tidy* in *./server* directory
+
+#### Running app locally
+
+Call *go run* in *./app* directory. Go to *localhost:5000* in the browser. Check out available endpoints in *./server* directory and explore them in the browser.
+
+#### Running unit tests locally
+
+Call *go test ./server* or use Intellij interface.
+
+## Possible issues with local development
+
+Combination of IntelliJ version 2022.2 (Build #IU-222.3345.118, built on July 26, 2022) and golang version 1.23.6 resulted in issues with debugging: code does not stop on debugging breakpoints but keeps processing forever. Working fix is to use golang 1.20 with this version of IntelliJ.
