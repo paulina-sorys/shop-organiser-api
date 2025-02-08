@@ -97,10 +97,23 @@ func TestServer(t *testing.T) {
 		checkProducts(t, productsAfterPUT, server.store.GetAllProducts())
 	})
 
-	t.Run("try PUT product (edit existing product) but product is not found in database", func(t *testing.T) {
+	t.Run("try PUT product but product is not found in database", func(t *testing.T) {
 		productNotInDatabase := model.Product{Name: "milk", ID: "456"}
 		productJSON, _ := json.Marshal(productNotInDatabase)
 		response := server.callApi(http.MethodPut, "/api/v1/product/edit", productJSON)
 		checkStatus(t, http.StatusUnprocessableEntity, response.Code)
+	})
+
+	t.Run("DELETE product", func(t *testing.T) {
+		productToDelete := model.Product{Name: "orange juice", ID: "123"}
+		productsAfterDelete := func() []model.Product {
+			products := make([]model.Product, len(db.Products)-1)
+			copy(products, db.Products[1:])
+			return products
+		}()
+		productJSON, _ := json.Marshal(productToDelete)
+		response := server.callApi(http.MethodDelete, "/api/v1/product/delete", productJSON)
+		checkStatus(t, http.StatusOK, response.Code)
+		checkProducts(t, productsAfterDelete, server.store.GetAllProducts())
 	})
 }

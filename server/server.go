@@ -24,6 +24,7 @@ func New(db model.Store) *Server {
 	mux.Handle("/api/v1/products/all", http.HandlerFunc(s.allProductsHandler))
 	mux.Handle("/api/v1/product/new", http.HandlerFunc(s.newProductHandler))
 	mux.Handle("/api/v1/product/edit", http.HandlerFunc(s.editProductHandler))
+	mux.Handle("/api/v1/product/delete", http.HandlerFunc(s.deleteProductHandler))
 
 	s.Handler = mux
 	return &s
@@ -47,7 +48,16 @@ func (s *Server) editProductHandler(w http.ResponseWriter, req *http.Request) {
 	err := json.NewDecoder(req.Body).Decode(&product)
 	handleDecodingProductError(err, w)
 	productEditError := s.store.EditProduct(product)
-	handleEditProductError(productEditError, w)
+	handleProductEditionOrDeletionError(productEditError, w)
+	w.WriteHeader(http.StatusOK)
+}
+
+func (s *Server) deleteProductHandler(w http.ResponseWriter, req *http.Request) {
+	var product model.Product
+	err := json.NewDecoder(req.Body).Decode(&product)
+	handleDecodingProductError(err, w)
+	productDeleteError := s.store.DeleteProduct(product)
+	handleProductEditionOrDeletionError(productDeleteError, w)
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -59,7 +69,7 @@ func handleDecodingProductError(err error, w http.ResponseWriter) {
 	}
 }
 
-func handleEditProductError(err error, w http.ResponseWriter) {
+func handleProductEditionOrDeletionError(err error, w http.ResponseWriter) {
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		fmt.Fprintf(w, err.Error())

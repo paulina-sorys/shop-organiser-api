@@ -10,4 +10,5 @@ type Store interface {
 	GetAllProducts() []Product
 	AddProduct(Product)
 	EditProduct(Product) error
+	DeleteProduct(Product) error
 }

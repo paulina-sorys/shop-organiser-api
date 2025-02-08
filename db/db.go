@@ -25,5 +25,19 @@ func (db *InMemoryDB) EditProduct(p model.Product) error {
 			return nil
 		}
 	}
-	return errors.New(fmt.Sprintf("Cannot find product with ID %s in database.", p.ID))
+	return cannotFindProductError(p.ID)
+}
+
+func (db *InMemoryDB) DeleteProduct(p model.Product) error {
+	for i, product := range db.Products {
+		if product.ID == p.ID {
+			db.Products = append(db.Products[:i], db.Products[i+1:]...)
+			return nil
+		}
+	}
+	return cannotFindProductError(p.ID)
+}
+
+func cannotFindProductError(id string) error {
+	return errors.New(fmt.Sprintf("Cannot find product with ID %s in database.", id))
 }
