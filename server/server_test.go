@@ -116,4 +116,11 @@ func TestServer(t *testing.T) {
 		checkStatus(t, http.StatusOK, response.Code)
 		checkProducts(t, productsAfterDelete, server.store.GetAllProducts())
 	})
+
+	t.Run("DELETE not existing product", func(t *testing.T) {
+		productNotInDatabase := model.Product{Name: "pencils", ID: "789"}
+		productJSON, _ := json.Marshal(productNotInDatabase)
+		response := server.callApi(http.MethodDelete, "/api/v1/product/delete", productJSON)
+		checkStatus(t, http.StatusUnprocessableEntity, response.Code)
+	})
 }
