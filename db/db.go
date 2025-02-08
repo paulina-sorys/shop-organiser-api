@@ -15,6 +15,7 @@ func (db *InMemoryDB) GetAllProducts() []model.Product {
 }
 
 func (db *InMemoryDB) AddProduct(p model.Product) {
+	// it doesn't create product ID but in-memory db doesn't need to
 	db.Products = append(db.Products, p)
 }
 

@@ -5,6 +5,7 @@ package server
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"model"
 	"net/http"
@@ -31,19 +32,28 @@ func New(db model.Store) *Server {
 }
 
 func (s *Server) allProductsHandler(w http.ResponseWriter, req *http.Request) {
+	if err := validateHttpMethod(req.Method, http.MethodGet, w); err != nil {
+		return
+	}
 	json.NewEncoder(w).Encode(s.store.GetAllProducts())
 	w.WriteHeader(http.StatusOK)
 }
 
 func (s *Server) newProductHandler(w http.ResponseWriter, req *http.Request) {
+	if err := validateHttpMethod(req.Method, http.MethodPost, w); err != nil {
+		return
+	}
 	var product model.Product
 	err := json.NewDecoder(req.Body).Decode(&product)
 	handleDecodingProductError(err, w)
 	s.store.AddProduct(product)
-	w.WriteHeader(http.StatusAccepted)
+	w.WriteHeader(http.StatusOK)
 }
 
 func (s *Server) editProductHandler(w http.ResponseWriter, req *http.Request) {
+	if err := validateHttpMethod(req.Method, http.MethodPut, w); err != nil {
+		return
+	}
 	var product model.Product
 	err := json.NewDecoder(req.Body).Decode(&product)
 	handleDecodingProductError(err, w)
@@ -53,6 +63,9 @@ func (s *Server) editProductHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func (s *Server) deleteProductHandler(w http.ResponseWriter, req *http.Request) {
+	if err := validateHttpMethod(req.Method, http.MethodDelete, w); err != nil {
+		return
+	}
 	var product model.Product
 	err := json.NewDecoder(req.Body).Decode(&product)
 	handleDecodingProductError(err, w)
@@ -75,4 +88,12 @@ func handleProductEditionOrDeletionError(err error, w http.ResponseWriter) {
 		fmt.Fprintf(w, err.Error())
 		return
 	}
+}
+
+func validateHttpMethod(got string, want string, w http.ResponseWriter) (err error) {
+	if got != want {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return errors.New("api endpoint called with incorrect http method")
+	}
+	return nil
 }

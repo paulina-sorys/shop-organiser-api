@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"db"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -39,13 +40,13 @@ func (s *Server) callApi(method, path string, body []byte) *httptest.ResponseRec
 }
 
 func TestServer(t *testing.T) {
-	db := &db.InMemoryDB{
+	dbStub := &db.InMemoryDB{
 		Products: []model.Product{
 			{Name: "juice", ID: "123"},
 			{Name: "cheese", ID: "342"},
 		},
 	}
-	server := New(db)
+	server := New(dbStub)
 
 	t.Run("GET all products", func(t *testing.T) {
 		response := server.callApi(http.MethodGet, "/api/v1/products/all", nil)
@@ -64,13 +65,13 @@ func TestServer(t *testing.T) {
 	})
 
 	t.Run("POST new product", func(t *testing.T) {
-		productsBeforePOST := db.Products
+		productsBeforePOST := dbStub.Products
 		productToAdd := model.Product{Name: "chocolate"}
 
 		productJSON, _ := json.Marshal(productToAdd)
 		response := server.callApi(http.MethodPost, "/api/v1/product/new", productJSON)
 
-		checkStatus(t, http.StatusAccepted, response.Code)
+		checkStatus(t, http.StatusOK, response.Code)
 
 		want := append(productsBeforePOST, productToAdd)
 		checkProducts(t, want, server.store.GetAllProducts())
@@ -84,8 +85,8 @@ func TestServer(t *testing.T) {
 	t.Run("PUT product (edit existing product)", func(t *testing.T) {
 		productEditOutcome := model.Product{Name: "orange juice", ID: "123"}
 		productsAfterPUT := func() []model.Product {
-			products := make([]model.Product, len(db.Products))
-			copy(products, db.Products)
+			products := make([]model.Product, len(dbStub.Products))
+			copy(products, dbStub.Products)
 			products[0] = productEditOutcome
 			return products
 		}()
@@ -107,8 +108,8 @@ func TestServer(t *testing.T) {
 	t.Run("DELETE product", func(t *testing.T) {
 		productToDelete := model.Product{Name: "orange juice", ID: "123"}
 		productsAfterDelete := func() []model.Product {
-			products := make([]model.Product, len(db.Products)-1)
-			copy(products, db.Products[1:])
+			products := make([]model.Product, len(dbStub.Products)-1)
+			copy(products, dbStub.Products[1:])
 			return products
 		}()
 		productJSON, _ := json.Marshal(productToDelete)
@@ -123,4 +124,37 @@ func TestServer(t *testing.T) {
 		response := server.callApi(http.MethodDelete, "/api/v1/product/delete", productJSON)
 		checkStatus(t, http.StatusUnprocessableEntity, response.Code)
 	})
+}
+
+func TestCallingServerEndpointsWithIncorrectHttpMethods(t *testing.T) {
+	productToAddJSON, _ := json.Marshal(model.Product{Name: "plant"})
+	productEditOutcomeJSON, _ := json.Marshal(model.Product{Name: "juice", ID: "123"})
+	productToDeleteJSON, _ := json.Marshal(model.Product{Name: "cheese", ID: "342"})
+
+	dbStub := &db.InMemoryDB{
+		Products: []model.Product{
+			{Name: "juice", ID: "123"},
+			{Name: "cheese", ID: "342"},
+		},
+	}
+	server := New(dbStub)
+
+	testCases := []struct {
+		description string
+		apiPath     string
+		json        []byte
+	}{
+		{"getting all products", "/api/v1/products/all", nil},
+		{"adding new product", "/api/v1/product/new", productToAddJSON},
+		{"edit product", "/api/v1/product/edit", productEditOutcomeJSON},
+		{"remove product", "/api/v1/product/delete", productToDeleteJSON},
+	}
+	for _, tc := range testCases {
+		t.Run(fmt.Sprintf("try %s with incorrect http method type", tc.description), func(t *testing.T) {
+			productsBeforeApiCall := dbStub.Products
+			response := server.callApi(http.MethodPatch, tc.apiPath, tc.json)
+			checkStatus(t, http.StatusMethodNotAllowed, response.Code)
+			checkProducts(t, productsBeforeApiCall, server.store.GetAllProducts())
+		})
+	}
 }
