@@ -46,7 +46,8 @@ func (s *Server) editProductHandler(w http.ResponseWriter, req *http.Request) {
 	var product model.Product
 	err := json.NewDecoder(req.Body).Decode(&product)
 	handleDecodingProductError(err, w)
-	s.store.EditProduct(product)
+	productEditError := s.store.EditProduct(product)
+	handleEditProductError(productEditError, w)
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -54,6 +55,14 @@ func handleDecodingProductError(err error, w http.ResponseWriter) {
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "Unable to parse request body into Product object, err: '%v'", err)
+		return
+	}
+}
+
+func handleEditProductError(err error, w http.ResponseWriter) {
+	if err != nil {
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		fmt.Fprintf(w, err.Error())
 		return
 	}
 }

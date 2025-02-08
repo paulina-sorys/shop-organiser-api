@@ -9,5 +9,5 @@ type Product struct {
 type Store interface {
 	GetAllProducts() []Product
 	AddProduct(Product)
-	EditProduct(Product)
+	EditProduct(Product) error
 }

@@ -16,7 +16,7 @@ import (
 
 // Test fails if received request response status is not expected
 func checkStatus(t *testing.T, want, got int) {
-	assert.Equal(t, want, got, "Wrong http status code.\nExpected: %d\n\t Got: %d", want, got)
+	assert.Equal(t, want, got, "Wrong http status code.\nExpected: %d\nGot\t: %d", want, got)
 }
 
 // Test fails if received slice of products is not expected
@@ -95,5 +95,12 @@ func TestServer(t *testing.T) {
 
 		checkStatus(t, http.StatusOK, response.Code)
 		checkProducts(t, productsAfterPUT, server.store.GetAllProducts())
+	})
+
+	t.Run("try PUT product (edit existing product) but product is not found in database", func(t *testing.T) {
+		productNotInDatabase := model.Product{Name: "milk", ID: "456"}
+		productJSON, _ := json.Marshal(productNotInDatabase)
+		response := server.callApi(http.MethodPut, "/api/v1/product/edit", productJSON)
+		checkStatus(t, http.StatusUnprocessableEntity, response.Code)
 	})
 }
