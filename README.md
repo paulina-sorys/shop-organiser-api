@@ -7,7 +7,7 @@ Planned functionalities:
   - query db
   - handle errors
 - manipulate db data using internal models and services
-- serve API for frontend client
+- serve REST API for frontend client
 
 ## IntelliJ IDE configuration to work with project locally
 
